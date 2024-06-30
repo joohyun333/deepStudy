@@ -13,5 +13,15 @@ public class Raisin {
     public double perimeter; // 둘레
     public String className; // 분류명
 
+    public double[] toSampleRow(){
+        return new double[]{area, majorAxisLength, minorAxisLength, eccentricity, convexArea, extent, perimeter};
+    }
 
+    public int toLabel(){
+        if(className.equals("Kecimen")){
+            return 0;
+        }else {
+            return 1;
+        }
+    }
 }
