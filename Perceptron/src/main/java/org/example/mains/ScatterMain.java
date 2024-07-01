@@ -1,8 +1,14 @@
-package org.example;
+package org.example.mains;
 
-import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.apache.xmlbeans.ResourceLoader;
+import org.example.Raisin;
+import org.example.RaisinEnum;
+import org.example.ScatterPlot;
+import org.jfree.chart.ui.UIUtils;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -11,39 +17,18 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class Main {
+public class ScatterMain {
     public static void main(String[] args) {
         List<Raisin> raisins = readRaisinExcel("dataset/Raisin_Dataset.xlsx");
-        Map<String, List<Raisin>> sample = toDivideSample(raisins, 0.8);
+        Map<String, List<Raisin>> sample = toDivideSample(raisins, 0.9);
         List<Raisin> train = sample.get("train");
         List<Raisin> test = sample.get("test");
-        
-        int epochs = 1000;
-
-        Perceptron perceptron = new Perceptron(7, 0.1);
-        List<double[]> trainSamples = new ArrayList<>();
-        List<Integer> trainLabels = new ArrayList<>();
-        for (Raisin raisin : train) {
-            double[] label = raisin.toSampleRow();
-            trainSamples.add(label);
-            trainLabels.add(raisin.toLabel());
-        }
-
-        // 퍼셉트론 학습
-        perceptron.train(trainSamples, trainLabels, epochs);
-
-        // 가중치와 편향 출력
-        perceptron.printWeightsAndBias();
-
-        // 예측 예시
-        int testCount = 0;
-        for (Raisin raisin : test) {
-            double[] label = raisin.toSampleRow();
-            int prediction = perceptron.predict(label);
-            System.out.println(testCount + " Prediction for new input: " + prediction + " answer : " + raisin.toLabel());
-            testCount += 1;
-        }
+        ScatterPlot example = new ScatterPlot("Raisin_Dataset", train, RaisinEnum.convexArea, RaisinEnum.area);
+        example.pack();
+        UIUtils.centerFrameOnScreen(example);
+        example.setVisible(true);
     }
+    // 층화 샘플링
     public static Map<String, List<Raisin>> toDivideSample(List<Raisin> raisins, double trainRate){
         int kecimen = 0;
         int besni = 0;
