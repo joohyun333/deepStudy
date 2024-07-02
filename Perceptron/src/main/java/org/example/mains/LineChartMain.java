@@ -1,51 +1,37 @@
 package org.example.mains;
 
-import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.apache.xmlbeans.ResourceLoader;
-import org.example.Perceptron;
+import org.example.LineChartPlot;
 import org.example.Raisin;
+import org.example.RaisinEnum;
+import org.example.ScatterPlot;
+import org.jfree.chart.ui.UIUtils;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
-public class Main {
+public class LineChartMain {
     public static void main(String[] args) {
         List<Raisin> raisins = readRaisinExcel("dataset/Raisin_Dataset.xlsx");
-        Map<String, List<Raisin>> sample = toDivideSample(raisins, 0.9);
+        Map<String, List<Raisin>> sample = toDivideSample(raisins, 1.0);
         List<Raisin> train = sample.get("train");
         List<Raisin> test = sample.get("test");
-        
-        int epochs = 500;
+        double xSlope = (-81323209) / 78036921;  // X기울기
+        double bias = (-266620) / 78036921;    // 편향
 
-        Perceptron perceptron = new Perceptron(2, 10);
-        List<double[]> trainSamples = new ArrayList<>();
-        List<Integer> trainLabels = new ArrayList<>();
-        for (Raisin raisin : train) {
-            double[] label = raisin.toSampleRow();
-            trainSamples.add(label);
-            trainLabels.add(raisin.toLabel());
-        }
-        // 퍼셉트론 학습
-        perceptron.train(trainSamples, trainLabels, epochs);
-
-        // 가중치와 편향 출력
-        perceptron.printWeightsAndBias();
-
-        // 예측 예시
-        int answerCount = 0; // 정답 수
-        int testCount = 0;
-        for (Raisin raisin : test) {
-            double[] label = raisin.toSampleRow();
-            int prediction = perceptron.bestPredict(label);
-            if (prediction == raisin.toLabel()){
-                answerCount += 1;
-            }
-            System.out.println(testCount + " Prediction for new input: " + prediction + " answer : " + raisin.toLabel());
-            testCount += 1;
-        }
-        System.out.println(test.size() + "개의 테스트 샘플 중에 정답 수 : " + answerCount);
+        LineChartPlot chart = new LineChartPlot(
+                "Raisin_Dataset", train, RaisinEnum.convexArea, RaisinEnum.area, xSlope, bias);
+        chart.pack();
+        UIUtils.centerFrameOnScreen(chart);
+        chart.setVisible(true);
     }
     // 층화 샘플링
     public static Map<String, List<Raisin>> toDivideSample(List<Raisin> raisins, double trainRate){

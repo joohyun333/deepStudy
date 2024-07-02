@@ -6,7 +6,9 @@ import java.util.List;
 public class Perceptron {
 
     private double[] weights;
+    private double[] bestWeights;
     private double bias;
+    private double bestBias;
     private final double learningRate;
     private final int featureCount;
     public Perceptron(int featureCount, double learningRate) {
@@ -23,6 +25,13 @@ public class Perceptron {
         double sum = bias;
         for (int i = 0; i < inputs.length; i++) {
             sum += weights[i] * inputs[i];
+        }
+        return activation(sum);
+    }
+    public int bestPredict(double[] inputs) {
+        double sum = bestBias;
+        for (int i = 0; i < inputs.length; i++) {
+            sum += bestWeights[i] * inputs[i];
         }
         return activation(sum);
     }
@@ -43,15 +52,21 @@ public class Perceptron {
         }
         double copyBias = bias;
         boolean stopCondition = false;
+        int h = 0;
+        int bestQ = 0;
+        weights = copyWeights.clone();
+        bestWeights = weights.clone();
+        bestBias = bias;
         while(!stopCondition){
+            int q = 0;
             stopCondition = true;
-            weights = copyWeights.clone();
-            bias = copyBias;
 
             System.out.println(Arrays.toString(weights) + " bias : " + bias);
 
             // 가중치와 편향 업데이트
             for (int i = 0; i < sample.size(); i++) {
+                double[] doubles = sample.get(i);
+                Integer i1 = labels.get(i);
                 int prediction = predict(sample.get(i));
                 if ((double)prediction != labels.get(i)) {
                     stopCondition = false;
@@ -59,35 +74,32 @@ public class Perceptron {
                         copyWeights[j] += learningRate * labels.get(i) * sample.get(i)[j];
                     }
                     copyBias += learningRate * labels.get(i);
+                }else{
+                    q += 1;
                 }
             }
-            weights = copyWeights;
-            bias = copyBias;
-        }
-//         for (int epoch = 0; epoch < epochs; epoch++) {
-//             weights = copyWeights.clone();
-//             bias = copyBias;
-//             // 가중치와 편향 업데이트
-//            for (int i = 0; i < sample.size(); i++) {
-//                int prediction = predict(sample.get(i));
-//                if ((double)prediction != labels.get(i)) {
-//                    for (int j = 0; j < weights.length; j++) {
-//                        copyWeights[j] += learningRate * labels.get(i) * sample.get(i)[j];
-//                    }
-//                    copyBias += learningRate * labels.get(i);
-//                }
-//            }
-//        }
-//        weights = copyWeights;
-//        bias = copyBias;
 
+            System.out.println("bestQ : " + bestQ + " q : " + q);
+            if (epochs >= h){
+                if (bestQ < q){
+                    bestWeights = weights.clone();
+                    bestBias = bias;
+                    bestQ = q;
+                }
+            }else{
+                stopCondition = true;
+            }
+            weights = copyWeights.clone();
+            bias = copyBias;
+            h += 1;
+        }
     }
 
     public void printWeightsAndBias() {
-        System.out.println("Weights: ");
-        for (double weight : weights) {
+        System.out.println("BestWeights: ");
+        for (double weight : bestWeights) {
             System.out.print(weight + " ");
         }
-        System.out.println("\nBias: " + bias);
+        System.out.println("\nBestBias: " + bestBias);
     }
 }

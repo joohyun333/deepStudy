@@ -51,9 +51,9 @@ public class Raisin {
 
     public int toLabel(){
         if(className.equals("Kecimen")){
-            return 1;
-        }else {
             return -1;
+        }else {
+            return 1;
         }
     }
 }
